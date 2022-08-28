@@ -1,5 +1,4 @@
 jQuery(document).ready(function() {
-
     $(".chat-list a").click(function() {
         $(".chatbox").addClass('showbox');
         return false;

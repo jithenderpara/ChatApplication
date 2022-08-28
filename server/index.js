@@ -1,85 +1,62 @@
-var bodyParser = require('body-parser');
-// var csrf = require('csurf');
-var express = require('express');
-var mongoose = require('mongoose');
-var session = require('client-sessions');
-var path = require('path');
-
-mongoose.connect('mongodb://localhost:27017/chatApplication');
-const PORT = 3000;
-var app = express();
-var allUsers = [];
-const server = require('http').createServer(app);
-const io = require('socket.io')(server);
-io.on('connection', client => {
-  client.on('newUserEmiter', ({ userName, id }) => {
-  console.log({ userName, id }, "new users")
-    
-    var foundIndex = allUsers.findIndex(item => userName == item.userName);
-  console.log(foundIndex)
-  console.log(allUsers)
-    if (foundIndex>-1) {
-      console.log("updated user")
-      allUsers[foundIndex] = { userName, id, socket: client.id };
-    } else{
-      console.log("added user");
-      allUsers.push({ userName, id, socket: client.id });
-    }
-    client.emit('allUserNamesEmiter', allUsers)
-  })
-  client.on('event', data => { /* … */ });
-  client.on('disconnect', () => { /* … */ });
+const _ = require("lodash");
+const express = require('express');
+const app = express();
+var path = require("path");
+const port = 3000; // define your port
+const server = app.listen(port, () => {
+  console.log(`We are Listening on port ${port}...`);
 });
 
-
-// middleware
-app.use(bodyParser.urlencoded({ extended: true }));
-app.use(session({
-  cookieName: 'session',
-  secret: 'keyboard cat',
-  duration: 30 * 60 * 1000,
-  activeDuration: 5 * 60 * 1000,
-}));
-// app.use(csrf());
-app.use('/static', express.static(path.join(__dirname, 'public')))
-
+const io = require('socket.io')(server, {
+  path: "/pathToConnection"
+});
+app.use("/static", express.static(path.join(__dirname, "public")));
 // routes
 app.get("/", (req, res) => {
   const indexFile = path.resolve("./views/index.html");
   res.status(200).sendFile(indexFile);
-})
-app.get("/home", (req, res) => {
-  const homeFile = path.resolve("./views/home.html");
-  const user = req.session.user;
-  res.status(200).sendFile(homeFile, { headers: JSON.stringify(user), lastModified: true, etag: false, user });
-})
-/*****
- * 
- * 
- * all post Methods
- */
-app.post("/login", (req, res) => {
-  const { userName, emailId, password, designation } = req.body;
-  var cleanUser = {
-    userName: userName,
-    password: password,
-    email: emailId,
-    designation
-  };
+});
+let users = {};
+io.on('connection', (socket) => {
 
-  req.session.user = cleanUser;
-  req.user = cleanUser;
-  res.status(200).send({ userName, emailId });
-})
-app.get("/getUserInfo", (req, res) => {
-  const { userName, emailId, designation } = req.session.user;
-  res.status(200).send({ userName, emailId, designation });
-})
-/*****
- * 
- * 
- * end all post Methods
- */
-server.listen(PORT, () => {
-  console.log(`application is running on http://localhost:3000/`)
-})
+  let userId = socket.handshake.query.userId; // GET USER ID
+  console.log("connected", userId)
+  // CHECK IS USER EXHIST 
+  if (!users[userId]) users[userId] = [];
+  
+  // PUSH SOCKET ID FOR PARTICULAR USER ID
+  users[userId].push(socket.id);
+   
+  // USER IS ONLINE BROAD CAST TO ALL CONNECTED USERS
+  io.sockets.emit("online", users);
+  console.log(userId, "Is Online!", socket.id);
+
+ 
+  socket.on("message", (data)=>{
+    console.log("in message");
+    const { fromUser, toUser, message }= data;
+    const socketId=users[toUser][0];
+    if(socketId)
+    io.to(socketId).emit('receivedMessage', {from: fromUser, to:toUser, message });
+    // socketId.emit('receivedMessage', data)
+  });
+
+  // DISCONNECT EVENT
+  socket.on('disconnect', (reason) => {
+
+    // REMOVE FROM SOCKET USERS
+    _.remove(users[userId], (u) => u === socket.id);
+    if (users[userId].length === 0) {
+      // ISER IS OFFLINE BROAD CAST TO ALL CONNECTED USERS
+      io.sockets.emit("offline", userId);
+      // REMOVE OBJECT
+      delete users[userId];
+    }
+   
+    socket.disconnect(); // DISCONNECT SOCKET
+
+    console.log(userId, "Is Offline!", socket.id);
+
+  });
+
+});

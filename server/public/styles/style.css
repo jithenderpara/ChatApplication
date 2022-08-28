@@ -777,3 +777,8 @@ button:focus {
         border-bottom-left-radius: 6px;
     }
 }
+.userImgIcon{
+    height: auto;
+    max-width: 45px;
+    border-radius: 50%;
+}

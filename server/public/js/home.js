@@ -6,9 +6,20 @@ $(document).ready(function () {
 
   // client-side
   socket.on("connect", () => {
-    console.log(socket.id); // x8WIv7-mJelg7on_ALbx
-  });
+   // USER IS ONLINE
+   socket.on("online", (userId) => {
+    console.log(userId, "Is Online!"); // update online status
+});
+socket.on("online", getAllUsers);
   socket.on("allUserNamesEmiter", getAllUsers);
+  socket.on("offline", (id)=>{
+    console.log('offline', id)
+  });
+
+
+   
+  });
+  
 
   socket.on("disconnect", () => {
     console.log(socket.id); // undefined
@@ -21,8 +32,8 @@ function getAllUsers(users) {
     const element = users[index];
     const html = `<a href="#" class="d-flex align-items-center">
         <div class="flex-shrink-0">
-            <img class="img-fluid"
-                src="https://mehedihtml.com/chatbox/assets/img/user.png"
+            <img class="img-fluid userImgIcon"
+                src="https://i.pravatar.cc/150?u=fake@${element.userName}"
                 alt="user img">
             <span class="active"></span>
         </div>
@@ -45,11 +56,12 @@ function getUser() {
       if (resultData) {
         console.log(resultData);
         const name = JSON.parse(resultData);
-        socket.emit("newUserEmiter", {
-          userName: name.userName,
-          id: socket.id,
-          designation: name.designation
-        });
+        // socket.emit("login", {
+        //   userName: name.userName,
+        //   id: socket.id,
+        //   designation: name.designation
+        // });
+        
       }
     },
   });
