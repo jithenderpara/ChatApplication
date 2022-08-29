@@ -1,8 +1,9 @@
 {
   "name": "auth",
   "version": "1.0.0",
-  "description": "A simple Node.js chat application example.",
+  "description": "App is providing technology of online chat allowing real-time text transmission over the Internet or another computer network. Messages are typically transmitted between two or more parties, when each user inputs text and triggers a transmission to the recipient(s), who are all connected on a common network. It differs from email in that conversations over instant messaging happen in real-time (hence 'instant'). Most modern IM applications (sometimes called 'social messengers', 'messaging apps' or 'chat apps') use push technology and also add other features such as emojis (or graphical smileys), file transfer, chatbots, voice over IP, or video chat capabilities",
   "main": "index.js",
+  "type":"module",
   "scripts": {
     "start": "node index.js",
     "watch": "nodemon --watch app --watch index.js",
@@ -16,12 +17,14 @@
     "body-parser": "^1.9.0",
     "client-sessions": "^0.7.0",
     "csurf": "^1.6.1",
+    "dotenv": "^16.0.1",
     "express": "^4.9.7",
     "lodash": "^4.17.21",
-    "mongoose": "^4.0.0",
+    "mongoose": "^4.13.21",
     "socket.io": "^4.5.1"
   },
   "devDependencies": {
-    "nodemon": "^2.0.19"
+    "nodemon": "^2.0.19",
+    "winston": "^3.8.1"
   }
 }
