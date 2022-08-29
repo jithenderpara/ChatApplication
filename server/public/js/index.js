@@ -12,15 +12,16 @@ const socket = io(host, {
 let users = [];
 let userId = null;
 function sendMessage() {
-    const date = new Date();
-    const time = date.getHours() + ":" + date.getMinutes(); // + ":" + date.getSeconds();
+  const date = new Date();
+  const time = date.getHours() + ":" + date.getMinutes(); // + ":" + date.getSeconds();
   const message = document.getElementById("messageTextBox").value;
   const data = { fromUser: queryParams.userId, toUser: userId, message };
   const html = `<div class="message-container"><div class="message-orange">
     <p class="message-content">${message}</p>
     <div class="message-timestamp-left">SMS ${time}</div>
 </div></div>`;
-document.getElementById("messages").innerHTML += html;
+  // document.getElementById("messages").innerHTML += html;
+  document.getElementById(`${userId}_tab`).innerHTML += html;
   socket.emit("message", data);
 }
 function getUserId(event, id) {
@@ -30,6 +31,7 @@ function getUserId(event, id) {
   document.getElementById("submitBtn").removeAttribute("disabled", false);
   element.classList.add("active");
   userId = id;
+  createTabsOfUsers(id);
 }
 function bindUesrs(users) {
   let userHtml = "";
@@ -111,26 +113,28 @@ socket.once("connect", () => {
     });
   });
 });
-
+function createTabsOfUsers(user) {
+  const lis = [
+    ...document.getElementById("messagesUsers").getElementsByTagName("li"),
+  ];
+  console.log(lis);
+  lis.forEach((ele) => {
+    ele.classList.remove("active");
+  });
+  const selectedEle = document.getElementById(`${user}_tab`);
+  if (!selectedEle) {
+    const html = `<li id="${user}_tab" class="active userTabs"><div class="userTabWrapper"><h2>${user}</h2></div></li>`;
+    document.getElementById("messagesUsers").innerHTML += html;
+  } else {
+    selectedEle.classList.add("active");
+  }
+}
 function bindMessage({ fromUser, toUser, message }) {
-    const date = new Date();
-    const time = date.getHours() + ":" + date.getMinutes(); // + ":" + date.getSeconds();
+  const date = new Date();
+  const time = date.getHours() + ":" + date.getMinutes(); // + ":" + date.getSeconds();
   const html = `<div class="message-container"><div class="username">${fromUser}</div><div class="message-blue">
     <p class="message-content">${message}</p>
     <div class="message-timestamp-left">SMS ${time}</div>
 </div></div>`;
-  //   const html = `<div class="container">
-  //     <div class="username">${fromUser}</div>
-  //     <div class="messagebox">
-  //     <div class="arrow">
-
-  //       <div class="outer"></div>
-  //       <div class="inner"></div>
-  //     </div>
-  //     <div class="message-body">
-  //       <p>${message}</p>
-  //     </div>
-  //     </div>
-  //   </div>`;
-  document.getElementById("messages").innerHTML += html;
+  document.getElementById(`${fromUser}_tab`).innerHTML += html;
 }

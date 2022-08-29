@@ -167,7 +167,30 @@ border-right: 16px solid transparent;
 bottom: -1px;
 right: -17px;
 }
-
+ul#messagesUsers{
+    border: 1px solid #e2e2e2;
+    background: #f6f6f6;
+    width: 40em;
+    border-radius: 4px;
+    padding: 20px;
+}
+ul#messagesUsers li {
+    list-style-type: none;
+    text-align: left;
+    display: none;
+    flex-direction: row;
+}
+ul#messagesUsers li.active{
+    display: table-row;
+}
+ul#messagesUsers li .userTabWrapper {
+    display: block;
+}
+ul#messagesUsers li .userTabWrapper h2 {
+    text-transform: capitalize;
+    padding: 0;
+    margin: 10px;
+}
 
 
 
