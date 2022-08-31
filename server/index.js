@@ -1,29 +1,34 @@
 // const _ = require("lodash");
-import _ from 'lodash';
+import _ from "lodash";
 // const express = require("express");
-import express from 'express';
+import express from "express";
 const app = express();
-import {resolve} from 'path';
+import { resolve } from "path";
 
 // var path = require("path");
 // var session = require("client-sessions");
-import session from 'client-sessions';
+import session from "client-sessions";
 
 // var bodyParser = require("body-parser");
-import bodyParser from 'body-parser';
-import routes from './routes/index.js';
+import bodyParser from "body-parser";
+import routes from "./src/routes/index.js";
+import routerFile from "./src/routes/uploadFiles.js";
 //
-// routes
-app.use(routes);
+
 // app.use(require('./routes/main'));
 //
-import {connect} from './config/index.js'
+import { connect } from "./src/config/index.js";
 const port = 3000; // define your port
 const server = app.listen(port, () => {
   console.log(`We are Listening on port ${port}...`);
 });
+
 // middleware
-app.use(bodyParser.urlencoded({ extended: true }));
+// parse application/x-www-form-urlencoded
+app.use(bodyParser.urlencoded({ extended: false, keepExtensions: true, uploadDir: "uploads" }));
+// parse application/json
+app.use(bodyParser.json());
+
 app.use(
   session({
     cookieName: "session",
@@ -34,16 +39,36 @@ app.use(
 );
 // app.use(csrf());
 // const io = require("socket.io")
-import { Server  } from "socket.io";
+import { Server } from "socket.io";
 const io = new Server(server, {
   path: "/pathToConnection",
-})
+});
 connect();
+// routes
+app.use('/api', routes);
+app.use('/api', routerFile);
 app.use("/static", express.static(resolve("public")));
 // routes
 app.get("/", (req, res) => {
-  const indexFile = resolve("./views/index.html");
+  const indexFile = resolve("./src/views/signin.html");
   res.status(200).sendFile(indexFile);
+});
+app.get("/home", (req, res) => {
+  if(req.session && req.session.user){
+    const {emailId, userName } = req.session.user;
+    const indexFile = resolve("./src/views/home.html");
+    res.header('userName',userName);
+    res.status(200).sendFile(indexFile);
+  }else{
+    res.redirect('/logout');
+  }
+  
+});
+app.get('/logout', function (req, res) {
+  if (req.session) {
+      req.session.reset();
+  }
+  res.redirect('/');
 });
 /** start socket */
 let users = {};
@@ -113,5 +138,3 @@ app.get("/getUserInfo", (req, res) => {
   const { userName, emailId, designation } = req.session.user;
   res.status(200).send({ userName, emailId, designation });
 });
-
-
