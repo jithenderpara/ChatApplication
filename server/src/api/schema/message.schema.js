@@ -1,5 +1,13 @@
 import mongoose from "mongoose";
 const messageInfoSchema = {
+  email:{
+    type: String,
+    required: true,
+  },
+  fullName:{
+    type: String,
+    required: true,
+  },
   from: {
     type: String,
     required: true,

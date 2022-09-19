@@ -252,6 +252,7 @@ message-area
     overflow: hidden;
     height: 100%;
     border-left: 1px solid #ccc;
+    display: none;
 }
 
 .chatbox .modal-dialog,

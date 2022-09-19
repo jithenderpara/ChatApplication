@@ -15,6 +15,7 @@
     <script src="/static/libs/jquery-3.6.0.min.js"></script>
     <script src="/static/js/home.js"></script>
     <script>
+
         jQuery(document).ready(function () {
             $.ajax({
                 type: "POST", //rest Type
@@ -25,6 +26,9 @@
                 success: function (response) {
                     const { msg: { userName, email }, status, url } = response;
                     if (status == "OK") {
+                        console.log(userName, "userName")
+                        userId = userName;
+                        console.log(userId, "userId")
                         loadUserInfo(window.location.origin, { userName, email });
                     }
                     else {
@@ -40,24 +44,31 @@
             $(".chat-icon").click(function () {
                 $(".chatbox").removeClass('showbox');
             });
-            
-    // $("#upload").change(function(){
-    //     const files= $("#upload")[0].files;
-    //     alert(JSON.stringify(files));
-    // });
+
+            // $("#upload").change(function(){
+            //     const files= $("#upload")[0].files;
+            //     alert(JSON.stringify(files));
+            // });
+
 
 
         });
-        function fileSelect(e){
-            const file= e.target.files;
+        function fileSelect(e) {
+            const file = e.target.files;
             console.log(file[0].name)
-            $("#uploadedFiles").append("<p class='file'>"+file[0].name+"</p>");
-   
-}
+            $("#uploadedFiles").append("<p class='file'>" + file[0].name + "</p>");
+
+        }
+
+        function showUserCommunication() {
+
+
+        }
     </script>
 </head>
 
 <body>
+    <h1 id="currentUserId"></h1>
     <!-- char-area -->
     <section class="message-area">
         <div class="container">
@@ -80,8 +91,8 @@
                                         <ul class="nav nav-tabs" id="myTab" role="tablist">
                                             <li class="nav-item" role="presentation">
                                                 <button class="nav-link active" id="Online-tab" data-bs-toggle="tab"
-                                                    data-bs-target="#Online" type="button" role="tab" aria-controls="Open"
-                                                    aria-selected="true">Online</button>
+                                                    data-bs-target="#Online" type="button" role="tab"
+                                                    aria-controls="Open" aria-selected="true">Online</button>
                                             </li>
                                             <li class="nav-item" role="presentation">
                                                 <button class="nav-link" id="Offline-tab" data-bs-toggle="tab"
@@ -125,9 +136,9 @@
                         <!-- chatlist -->
 
                         <!-- chatbox -->
-                        <div class="chatbox">
+                        <div class="chatbox" id="chatbox">
                             <div class="modal-dialog-scrollable">
-                                <div class="modal-content">
+                                <div class="modal-content" id="MessageBody">
                                     <div class="msg-head">
                                         <div class="row">
                                             <div class="col-8">
@@ -141,7 +152,7 @@
                                                             alt="user img">
                                                     </div>
                                                     <div class="flex-grow-1 ms-3">
-                                                        <h3 id="chatName" data-name="">Mehedi Hasan</h3>
+                                                        <h3 id="chatName" data-name=""></h3>
                                                         <!-- <p>front end developer</p> -->
                                                     </div>
                                                 </div>
@@ -170,56 +181,18 @@
 
                                     <div class="modal-body">
                                         <div class="msg-body">
-                                            <ul>
-                                                <li class="sender">
-                                                    <p> Hey, Are you there? </p>
-                                                    <span class="time">10:06 am</span>
-                                                </li>
-                                                <li class="sender">
-                                                    <p> Hey, Are you there? </p>
-                                                    <span class="time">10:16 am</span>
-                                                </li>
-                                                <li class="repaly">
-                                                    <p> Last Minute Festive Packages From Superbreak</p>
-                                                    <span class="time">10:20 am</span>
-                                                </li>
-                                                <li class="sender">
-                                                    <p> Hey, Are you there? </p>
-                                                    <span class="time">10:26 am</span>
-                                                </li>
-                                                <li class="sender">
-                                                    <p> Hey, Are you there? </p>
-                                                    <span class="time">10:32 am</span>
-                                                </li>
-                                                <li class="repaly">
-                                                    <p>Last Minute Festive Packages From Superbreak</p>
-                                                    <span class="time">10:35 am</span>
-                                                </li>
-                                                <li>
-                                                    <div class="divider">
-                                                        <h6>Today</h6>
-                                                    </div>
-                                                </li>
-
-                                                <li class="repaly">
-                                                    <p> Last Minute Festive Packages From Superbreak</p>
-                                                    <span class="time">10:36 am</span>
-                                                </li>
-                                                <li class="repaly">
-                                                    <p>Last Minute Festive Packages From Superbreak</p>
-                                                    <span class="time">junt now</span>
-                                                </li>
-
+                                            <ul id="UserMessage">
                                             </ul>
                                         </div>
                                     </div>
 
                                     <div class="send-box">
                                         <form action="">
-                                            <input type="text" class="form-control" aria-label="message…"
+                                            <input type="text" class="form-control" aria-label="message…" id="inputMsg"
                                                 placeholder="Write message…">
 
-                                            <button type="button" id="sendMessage"><i class="fa fa-paper-plane" aria-hidden="true"></i>
+                                            <button type="button" id="sendMessage"><i class="fa fa-paper-plane"
+                                                    aria-hidden="true"></i>
                                                 Send</button>
                                         </form>
 
@@ -231,8 +204,8 @@
                                                             src="https://mehedihtml.com/chatbox/assets/img/upload.svg"
                                                             alt="image title"> attached file
                                                     </span><input type="file" name="upload" id="upload"
-                                                        class="upload-box" placeholder="Upload File" onchange="fileSelect(event)"
-                                                        aria-label="Upload File">
+                                                        class="upload-box" placeholder="Upload File"
+                                                        onchange="fileSelect(event)" aria-label="Upload File">
                                                 </div>
                                                 <div id="uploadedFiles" class="uploadedFiles"></div>
                                             </div>
@@ -254,7 +227,8 @@
         function loadUserInfo(host, { userName, email }) {
             // const host = "http://localhost:3000";
             // PASS your query parameters
-            const queryParams = { userId: userName};
+            const queryParams = { userId: userName };
+            $("#currentUserId").text(userId);
             const socket = io(host, {
                 path: "/pathToConnection",
                 transports: ["websocket"],
@@ -264,7 +238,6 @@
                 rejectUnauthorized: false,
             });
             let users = [];
-            let userId = null;
             socket.once("connect", () => {
                 // USER IS ONLINE
                 socket.on("online", (usersObj) => {
@@ -285,7 +258,31 @@
                     }
                     bindUesrs(users);
                 });
+                // receivedMessage
+                socket.on("receivedMessage", function (data) {
+                    console.log("receivedMessage=>", data);
+                    bindMessage({
+                        fromUser: data.from,
+                        toUser: data.to,
+                        message: data.message,
+                    });
+                });
             });
+            $("#sendMessage").click(function () {
+                const message = $("#inputMsg").val();
+                console.log(message, "message===>")
+                const data = { fromUser: userId, toUser: selectedUser, message };
+                console.log(data, "sendMessage")
+                socket.emit("message", data);
+                const date = new Date();
+                const time = date.getHours() + ":" + date.getMinutes(); // + ":" + date.getSeconds();
+                const html = `<li class="sender">
+                            <p> ${message}</p>
+                            <span class="time">${time}</span>
+                            </li>`;
+                $("#UserMessage").append(html);
+                $("#inputMsg").val('');
+            })
         }
     </script>
 </body>

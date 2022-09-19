@@ -88,6 +88,7 @@ io.on("connection", (socket) => {
   socket.on("message", (data) => {
     console.log("in message");
     const { fromUser, toUser, message } = data;
+    console.log(users)
     const socketId = users[toUser][0];
     if (socketId)
       io.to(socketId).emit("receivedMessage", {
