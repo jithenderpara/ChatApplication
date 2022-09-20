@@ -74,12 +74,15 @@ app.get('/logout', function (req, res) {
 let users = {};
 io.on("connection", (socket) => {
   let userId = socket.handshake.query.userId; // GET USER ID
+  let email = socket.handshake.query.email; // GET USER ID
   console.log("connected", userId);
   // CHECK IS USER EXHIST
   if (!users[userId]) users[userId] = [];
 
   // PUSH SOCKET ID FOR PARTICULAR USER ID
   users[userId].push(socket.id);
+  // users[userId].push(email);
+  // users[userId].push({id:socket.id, email:emailId});
 
   // USER IS ONLINE BROAD CAST TO ALL CONNECTED USERS
   io.sockets.emit("online", users);

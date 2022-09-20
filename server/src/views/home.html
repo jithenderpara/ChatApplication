@@ -28,6 +28,7 @@
                     if (status == "OK") {
                         console.log(userName, "userName")
                         userId = userName;
+                        UserEmailId=email;
                         console.log(userId, "userId")
                         loadUserInfo(window.location.origin, { userName, email });
                     }
@@ -68,7 +69,7 @@
 </head>
 
 <body>
-    <h1 id="currentUserId"></h1>
+    <!-- <h1 id="currentUserId"></h1> -->
     <!-- char-area -->
     <section class="message-area">
         <div class="container">
@@ -222,69 +223,6 @@
         </div>
         </div>
     </section>
-    <!-- char-area -->
-    <script>
-        function loadUserInfo(host, { userName, email }) {
-            // const host = "http://localhost:3000";
-            // PASS your query parameters
-            const queryParams = { userId: userName };
-            $("#currentUserId").text(userId);
-            const socket = io(host, {
-                path: "/pathToConnection",
-                transports: ["websocket"],
-                upgrade: false,
-                query: queryParams,
-                reconnection: false,
-                rejectUnauthorized: false,
-            });
-            let users = [];
-            socket.once("connect", () => {
-                // USER IS ONLINE
-                socket.on("online", (usersObj) => {
-                    users = [];
-                    console.log(usersObj, "Is Online!"); // update online status
-                    for (const key in usersObj) {
-                        console.log(`${key}: ${usersObj[key]}`);
-                        users.push({ userId: key, status: "Online" });
-                    }
-                    bindUesrs(users);
-                });
-                // USER IS OFFLINE
-                socket.on("offline", (userId) => {
-                    console.log(userId, "Is Offline!"); // update offline status
-                    var findUser = users.filter((user) => user.userId == userId);
-                    if (findUser.length > 0) {
-                        findUser[0].status = "Offline";
-                    }
-                    bindUesrs(users);
-                });
-                // receivedMessage
-                socket.on("receivedMessage", function (data) {
-                    console.log("receivedMessage=>", data);
-                    bindMessage({
-                        fromUser: data.from,
-                        toUser: data.to,
-                        message: data.message,
-                    });
-                });
-            });
-            $("#sendMessage").click(function () {
-                const message = $("#inputMsg").val();
-                console.log(message, "message===>")
-                const data = { fromUser: userId, toUser: selectedUser, message };
-                console.log(data, "sendMessage")
-                socket.emit("message", data);
-                const date = new Date();
-                const time = date.getHours() + ":" + date.getMinutes(); // + ":" + date.getSeconds();
-                const html = `<li class="sender">
-                            <p> ${message}</p>
-                            <span class="time">${time}</span>
-                            </li>`;
-                $("#UserMessage").append(html);
-                $("#inputMsg").val('');
-            })
-        }
-    </script>
 </body>
 
 </html>

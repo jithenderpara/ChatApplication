@@ -1,4 +1,64 @@
-
+function loadUserInfo(host, { userName, email }) {
+  // const host = "http://localhost:3000";
+  // PASS your query parameters
+  const queryParams = { userId: userName, email };
+  // $("#currentUserId").text(userId);
+  const socket = io(host, {
+      path: "/pathToConnection",
+      transports: ["websocket"],
+      upgrade: false,
+      query: queryParams,
+      reconnection: false,
+      rejectUnauthorized: false,
+  });
+  let users = [];
+  socket.once("connect", () => {
+      // USER IS ONLINE
+      socket.on("online", (usersObj) => {
+          users = [];
+          console.log(usersObj, "Is Online!"); // update online status
+          for (const key in usersObj) {
+              console.log(`${key}: ${usersObj[key]}`);
+              users.push({ userId: key, status: "Online"});
+          }
+          bindUesrs(users);
+      });
+      // USER IS OFFLINE
+      socket.on("offline", (userId) => {
+          console.log(userId, "Is Offline!"); // update offline status
+          var findUser = users.filter((user) => user.userId == userId);
+          if (findUser.length > 0) {
+              findUser[0].status = "Offline";
+          }
+          bindUesrs(users);
+      });
+      // receivedMessage
+      socket.on("receivedMessage", function (data) {
+          console.log("receivedMessage=>", data);
+          bindMessage({
+              fromUser: data.from,
+              toUser: data.to,
+              message: data.message,
+          });
+      });
+  });
+  $("#sendMessage").click(function () {
+      const message = $("#inputMsg").val();
+      console.log(message, "message===>")
+      const data = { fromUser: userId, toUser: selectedUser, message };
+      console.log(data, "sendMessage")
+      socket.emit("message", data);
+      const date = new Date();
+      const time = date.getHours() + ":" + date.getMinutes(); // + ":" + date.getSeconds();
+      const html = `<li class="sender">
+                  <p> ${message}</p>
+                  <span class="time">${time}</span>
+                  </li>`;
+      $("#UserMessage").append(html);
+      $("#inputMsg").val('');
+      saveMsgInDB({fromUser: queryParams.userId, toUser: selectedUser, message});
+  })
+}
 function sendMessage() {
   const date = new Date();
   const time = date.getHours() + ":" + date.getMinutes(); // + ":" + date.getSeconds();
@@ -11,6 +71,34 @@ function sendMessage() {
   // document.getElementById("messages").innerHTML += html;
   document.getElementById(`${userId}_tab`).innerHTML += html;
   socket.emit("message", data);
+  saveMsgInDB({fromUser: queryParams.userId, toUser: userId, message});
+
+}
+function saveMsgInDB({fromUser,toUser,message }){
+  const reqBody={
+    "email":UserEmailId,
+    "fullName":fromUser,
+    "from":fromUser,
+    "to":toUser,
+    "message":message,
+    "type":"text"
+}
+  $.ajax({
+    type: "POST", //rest Type
+    url: "/api/user/saveMessages",
+    async: true,
+    data: JSON.stringify(reqBody),
+    contentType: "application/json; charset=utf-8",
+    success: function (response) {
+        const { msg, status } = response;
+        if (status == "OK") {
+          console.log(msg, "saved message");
+        }
+        else {
+            alert(msg);
+        }
+    },
+});
 }
 function getUserId(event, id) {
   console.log(event);
@@ -23,6 +111,7 @@ function getUserId(event, id) {
 }
 let userId = null;
 let selectedUser= null;
+let UserEmailId=null;
 function bindUesrs(users) {
   let userOfflineHtml = "";
   let userOnLineHtml = "";
@@ -69,8 +158,8 @@ function chatToUser(userName){
   $("#chatName").html(selectedUser);
   // $("#sendMessage").attr("data-name", userName)
   console.log(userName);
-  $("#UserMessage").html("");
-  $("#inputMsg").val('');
+  $("#UserMessage").html("");// clear prev msg
+  $("#inputMsg").val('');// clear prev text
 
 }
 // document.getElementById("host").innerHTML = host;

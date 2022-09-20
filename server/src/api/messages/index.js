@@ -1,5 +1,5 @@
 
-import { MessageSchema } from "../schema/message.schema";
+import { MessageSchema } from "../schema/message.schema.js";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
 dotenv.config();
@@ -7,44 +7,31 @@ const saveMessages = async (request, response) => {
     try {
         const MessageModel = mongoose.model(process.env.MESSAGE_COLLECTION_NAME, MessageSchema);
         const post = request.body;
-        const { fullName, email, from, to,  message, type} = post;
-        const record = await UserModel.findOne({ email });
-        if (request.session.user) {
-            if (record) {
-                await MessageModel.findOneAndUpdate(
-                    {
-                        email,
-                    },
-                    {fullName, from , to,  message, type, createdDate: new Date() },
-                    { upsert: true, useFindAndModify: false }
-                ).catch((e)=>{
-                   return response.send({
-                        status: "Fail",
-                        msg: "That email is already taken, please try another.",
-                        url: "/login",
-                    }); 
-                });
+        const { fullName, email, from, to,  message, type} = post;  
+        const record = await MessageModel.findOne({ email });
+        console.log(record, "record")
+        if (record) {
+            const recordMsg= await MessageModel.update(
+                {email},
+                {$addToSet: {massages: {fullName, from , to,  message, type, createdDate: new Date() }} }
+            );
+            console.log(record);
+            if (recordMsg) {
                 return response.send({ status: "OK", msg: "Message saved Sucess", url: "" });
                
             } else {
-                MessageModel.create({email, fullName, from, to,  message, type, createdDate: new Date() })
-                    .then((result) => {
-                        if (result) {
-                            response.send({ status: "OK", msg: "Message saved Sucess", url: "/login" });
-                        } else {
-                            response.json({ post, msg: "getting an error", result });
-                        }
-                    })
-                    .catch((Error) =>
-                        response.json({ post, msg: "getting an error" + Error })
-                    );
+                response.json({ post, msg: "getting an error" + Error })
             }
         } else {
-            response.send({
-                status: "Fail",
-                msg: "Session expired please login again",
-                url: "/login",
-            });
+            const recordMsg= await MessageModel.create(
+                {email, massages: [{email, fullName, from , to,  message, type, createdDate: new Date() }]}
+            );
+            if (recordMsg) {
+                return response.send({ status: "OK", msg: "Message saved Sucess", url: "" });
+               
+            } else {
+                response.json({ post, msg: "getting an error" + Error })
+            }
         }
     } catch (Error) {
         response.json({ msg: "getting an error" + Error });
