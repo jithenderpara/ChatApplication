@@ -39,11 +39,17 @@ const saveMessages = async (request, response) => {
 };
 const getMessages = async (request, response) => {
     try {
-        if (request.session.user) {
-            const { userName } = request.session.user;
+        // if (!request.session.user) {
+            const MessageModel = mongoose.model(process.env.MESSAGE_COLLECTION_NAME, MessageSchema);
+            // const { userName } = request.session.user;
             const post = request.body;
-            const { email } = post;
-            const record = await MessageModel.findOne({ email });
+            const { email, toUser } = post;
+            let reqQuery={email}
+            if(toUser){
+                reqQuery={email, massages:{$elemMatch: {to: toUser}}}
+            }
+            console.log(reqQuery);
+            const record = await MessageModel.findOne(reqQuery);
             if(record){
               return response.send({
                 status: "OK",
@@ -56,13 +62,13 @@ const getMessages = async (request, response) => {
                 msg: "No data",
                 url: null,
             });
-        } else {
-            response.send({
-                status: "Fail",
-                msg: "Session expired please login again",
-                url: "/login",
-            });
-        }
+        // } else {
+        //     response.send({
+        //         status: "Fail",
+        //         msg: "Session expired please login again",
+        //         url: "/login",
+        //     });
+        // }
     } catch (Error) {
         response.json({ msg: "getting an error" + Error });
     }
