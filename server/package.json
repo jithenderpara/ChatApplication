@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "start": "node index.js",
-    "watch": "nodemon index.js --watch './src/*",
+    "watch": "nodemon --watch src --watch public index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Randall Degges",

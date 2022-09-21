@@ -321,7 +321,7 @@ input[type="password"] {
   border: none;
   font-size: 16px;
   font-weight: 200;
-  margin-bottom: 45px;
+  /* margin-bottom: 45px; */
   padding: 5px 0 10px 0;
   background: transparent;
   border-bottom: 1px solid #4c5c72;
@@ -355,6 +355,21 @@ input.form-btn:hover{
 .form-signup{
   display: none;
 }
-.form-signin{  
+/* .form-signin{  
   padding-top: 120px;
+} */
+
+.field{
+  margin-bottom: 45px;
+}
+.field label.error, .errors{
+  color: #f08686;
+  font-size: 13px;
+}
+.errors{
+  margin: 10px 40px;
+    border: 1px solid #fe939385;
+    padding: 13px;
+    border-radius: 2px;
+    display: none;
 }
